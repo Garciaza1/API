@@ -5,8 +5,8 @@ services:
     image: postgres
     environment:
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: yourpassword
-      POSTGRES_DB: yourdb
+      POSTGRES_PASSWORD: Gr112495#$
+      POSTGRES_DB: go
     ports:
       - "5432:5432"
     volumes:
