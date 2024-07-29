@@ -94,22 +94,15 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 
 // UpdateUser atualiza um usuário por ID
 func UpdateUser(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	id, err := strconv.Atoi(vars["id"])
-	if err != nil {
-		http.Error(w, "Invalid user ID", http.StatusBadRequest)
-		return
-	}
-
 	var user models.Usuario
-	err = json.NewDecoder(r.Body).Decode(&user)
+	err := json.NewDecoder(r.Body).Decode(&user)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
 	query := "UPDATE usuario SET nome = $1, senha = $2, email = $3, tipo = $4, tel = $5, endereco = $6, cpf = $7, cep = $8 WHERE id = $9"
-	result := db.DB.Exec(query, user.Nome, user.Senha, user.Email, user.Tipo, user.Tel, user.Endereco, user.CPF, user.CEP, id)
+	result := db.DB.Exec(query, user.Nome, user.Senha, user.Email, user.Tipo, user.Tel, user.Endereco, user.CPF, user.CEP, user.ID)
 	if result.Error != nil {
 		http.Error(w, result.Error.Error(), http.StatusInternalServerError)
 		return
@@ -120,7 +113,6 @@ func UpdateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user.ID = id
 	json.NewEncoder(w).Encode(user)
 }
 
@@ -146,6 +138,6 @@ func DeleteUser(w http.ResponseWriter, r *http.Request) {
         return
     }
 
-    w.WriteHeader(http.StatusNoContent)
+    w.WriteHeader(http.StatusAccepted)
 }
 

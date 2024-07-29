@@ -6,11 +6,14 @@ import (
 )
 
 func NewRouter() *mux.Router {
-    r := mux.NewRouter()
-    r.HandleFunc("/users", handlers.GetAllUsers).Methods("GET")
-    r.HandleFunc("/users/{id}", handlers.GetUser).Methods("GET")
-    r.HandleFunc("/users", handlers.CreateUser).Methods("POST")
-    r.HandleFunc("/users/{id}", handlers.UpdateUser).Methods("PUT")
-    r.HandleFunc("/users/{id}", handlers.DeleteUser).Methods("DELETE")
-    return r
+    router := mux.NewRouter()
+	// USERS
+    router.HandleFunc("/users", handlers.GetAllUsers).Methods("GET")
+    router.HandleFunc("/users/{id}", handlers.GetUser).Methods("GET")
+    router.HandleFunc("/users", handlers.CreateUser).Methods("POST")
+    router.HandleFunc("/users/{id}", handlers.UpdateUser).Methods("PUT")
+    router.HandleFunc("/users/{id}", handlers.DeleteUser).Methods("DELETE")
+    // PRODUTOS 
+	
+	return router
 }
