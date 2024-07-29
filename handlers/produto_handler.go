@@ -50,7 +50,7 @@ func GetProduto(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	log.Println("resultados encontrados\n")
+	log.Println("resultados encontrados")
 	log.Print(result)
 
 	json.NewEncoder(w).Encode(produto)
@@ -79,7 +79,7 @@ func GetDeletedProduto(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	log.Println("resultados encontrados\n")
+	log.Println("resultados encontrados")
 	log.Print(result)
 
 	json.NewEncoder(w).Encode(produto)
@@ -109,7 +109,7 @@ func getUserDeletedProduct(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	log.Println("resultados encontrados\n")
+	log.Println("resultados encontrados")
 	log.Print(result)
 
 	json.NewEncoder(w).Encode(produto)
@@ -135,7 +135,7 @@ func CreateProduto(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	log.Println("Instância de produto criada com sucesso!\n")
+	log.Println("Instância de produto criada com sucesso!")
 	log.Print(result)
 
 	json.NewEncoder(w).Encode(produto)
@@ -183,10 +183,10 @@ func SoftDeleteProduct(w http.ResponseWriter, r *http.Request){
 		return
 	}
 
-	if result.RowsAffected == 0{
-		http.Error(w, "Produto not found!", http.StatusNotFound)
-		return
-	}
+	// if result.RowsAffected == 0{
+	// 	http.Error(w, "Produto not found!", http.StatusNotFound)
+	// 	return
+	// }
 
     w.WriteHeader(http.StatusAccepted)
 }
