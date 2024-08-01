@@ -59,7 +59,7 @@ func GetProduto(w http.ResponseWriter, r *http.Request) {
 func GetDeletedProduto(w http.ResponseWriter, r *http.Request) {
 	// captura o id dos params
 	vars := mux.Vars(r)
-	id, err := strconv.Atoi(vars["product_id"])
+	id, err := strconv.Atoi(vars["id"])
 	if err != nil {
 		http.Error(w, "Invalid product id", http.StatusBadRequest)
 		return
@@ -85,8 +85,7 @@ func GetDeletedProduto(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(produto)
 }
 
-func getUserDeletedProduct(w http.ResponseWriter, r *http.Request) {
-	
+func GetDeletedByUser(w http.ResponseWriter, r *http.Request) {
 	// captura o id dos params
 	vars := mux.Vars(r)
 	id, err := strconv.Atoi(vars["user_id"])
@@ -96,7 +95,7 @@ func getUserDeletedProduct(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var produto models.Produto
-	query := "SELECT * FROM produto WHERE user_id = ? AND deleted_at IS NOT NULL"
+	query := "SELECT * FROM produto WHERE user_id = $1 AND deleted_at IS NOT NULL"
 
 	result := db.DB.Raw(query, id).Scan(&produto)
 	if result.Error != nil {
