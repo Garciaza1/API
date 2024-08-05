@@ -164,21 +164,21 @@ func UpdateProduto(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(produto)
 }
 
-func SoftDeleteProduct(w http.ResponseWriter, r *http.Request){
+func SoftDeleteProduct(w http.ResponseWriter, r *http.Request) {
 
 	vars := mux.Vars(r)
 	id, err := strconv.Atoi(vars["id"])
-	
-	if err != nil{
+
+	if err != nil {
 		http.Error(w, "Product Id Invalid!", http.StatusBadRequest)
 		return
 	}
 
-    query := "UPDATE produto SET deleted_at = NOW() WHERE id = $1"
+	query := "UPDATE produto SET deleted_at = NOW() WHERE id = $1"
 	result := db.DB.Exec(query, id)
 
-	if result != nil{
-		http.Error(w,  result.Error.Error(), http.StatusInternalServerError)
+	if result != nil {
+		http.Error(w, result.Error.Error(), http.StatusInternalServerError)
 		return
 	}
 
@@ -187,5 +187,32 @@ func SoftDeleteProduct(w http.ResponseWriter, r *http.Request){
 	// 	return
 	// }
 
-    w.WriteHeader(http.StatusAccepted)
+	w.WriteHeader(http.StatusAccepted)
+}
+
+func RestaurarProduto(w http.ResponseWriter, r *http.Request) {
+
+	vars := mux.Vars(r)
+	id, err := strconv.Atoi(vars["id"])
+
+	if err != nil {
+		http.Error(w, "Product Id Invalid!", http.StatusBadRequest)
+		return
+	}
+
+	query := "UPDATE produto SET deleted_at = NULL WHERE id = $1"
+	result := db.DB.Exec(query, id)
+
+	if result != nil {
+		http.Error(w, result.Error.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// if result.RowsAffected == 0{
+	// 	http.Error(w, "Produto not found!", http.StatusNotFound)
+	// 	return
+	// }
+
+	w.WriteHeader(http.StatusAccepted)
+
 }

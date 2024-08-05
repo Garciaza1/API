@@ -31,6 +31,59 @@ func CreateVenda(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(venda)
 }
 
+func EditVenda(w http.ResponseWriter, r *http.Request) {
+
+	var venda models.Venda
+
+	err := json.NewDecoder(r.Body).Decode(&venda)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	tx := db.DB.Begin()
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+		}
+	}()
+
+	// ver se a venda existe!
+	var existingVenda models.Venda
+	if err := tx.First(&existingVenda, venda.ID).Error; err != nil {
+		tx.Rollback()
+		http.Error(w, "Venda não encontrada", http.StatusNotFound)
+		return
+	}
+
+	//update da venda antes
+	updateVendaQuery := "UPDATE vendas SET endereco = ?, num_residencia = ?, cep = ?, total = ?, quantidade = ?, mtd_pay = ?, cpf = ?, user_id = ?, product_id = ?, vendedor_id = ? WHERE id = ?"
+	if err := tx.Exec(updateVendaQuery, venda.Endereco, venda.NumResidencia, venda.CEP, venda.Total, venda.Quantidade, venda.MtdPay, venda.CPF, venda.UserID, venda.ProdutoID, venda.VendedorID, venda.ID).Error; err != nil {
+		tx.Rollback()
+		http.Error(w, "Não foi possível atualizar a venda", http.StatusInternalServerError)
+		return
+	}
+
+	// update de produto em seguida
+	updateProdutoQuery := "UPDATE produto SET quantidade = quantidade - ? WHERE id = ?"
+	if err := tx.Exec(updateProdutoQuery, venda.Quantidade, venda.ID).Error; err != nil {
+		tx.Rollback()
+		http.Error(w, "Não foi possível atualizar o produto", http.StatusInternalServerError)
+		return
+	}
+
+	// Commit da transação
+	if err := tx.Commit().Error; err != nil {
+		tx.Rollback()
+		http.Error(w, "Não foi possível confirmar a transação", http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(map[string]string{"message": "Venda atualizada com sucesso!"})
+
+}
+
 func GetAll(w http.ResponseWriter, r *http.Request) {
 
 	var vendas models.Venda
@@ -104,7 +157,7 @@ func GetClientVendas(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(vendas)
 }
 
-func getComprasClient(w http.ResponseWriter, r *http.Request) {
+func GetComprasClient(w http.ResponseWriter, r *http.Request) {
 
 	vars := mux.Vars(r)
 
@@ -132,7 +185,7 @@ func getComprasClient(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(vendas)
 }
 
-func getUserVendas(w http.ResponseWriter, r *http.Request) {
+func GetUserVendas(w http.ResponseWriter, r *http.Request) {
 
 	vars := mux.Vars(r)
 
@@ -278,57 +331,4 @@ func CancelarVenda(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(map[string]string{"message": "Venda cancelada com sucesso!"})
-}
-
-func editVenda(w http.ResponseWriter, r *http.Request) {
-
-	var venda models.Venda
-
-	err := json.NewDecoder(r.Body).Decode(&venda)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-
-	tx := db.DB.Begin()
-	defer func() {
-		if r := recover(); r != nil {
-			tx.Rollback()
-		}
-	}()
-
-	// ver se a venda existe!
-	var existingVenda models.Venda
-	if err := tx.First(&existingVenda, venda.ID).Error; err != nil {
-		tx.Rollback()
-		http.Error(w, "Venda não encontrada", http.StatusNotFound)
-		return
-	}
-
-	//update da venda antes
-	updateVendaQuery := "UPDATE vendas SET endereco = ?, num_residencia = ?, cep = ?, total = ?, quantidade = ?, mtd_pay = ?, cpf = ?, user_id = ?, product_id = ?, vendedor_id = ? WHERE id = ?"
-	if err := tx.Exec(updateVendaQuery, venda.Endereco, venda.NumResidencia, venda.CEP, venda.Total, venda.Quantidade, venda.MtdPay, venda.CPF, venda.UserID, venda.ProdutoID, venda.VendedorID, venda.ID).Error; err != nil {
-		tx.Rollback()
-		http.Error(w, "Não foi possível atualizar a venda", http.StatusInternalServerError)
-		return
-	}
-
-	// update de produto em seguida	
-	updateProdutoQuery := "UPDATE produto SET quantidade = quantidade - ? WHERE id = ?"
-	if err := tx.Exec(updateProdutoQuery, venda.Quantidade, venda.ID).Error; err != nil {
-		tx.Rollback()
-		http.Error(w, "Não foi possível atualizar o produto", http.StatusInternalServerError)
-		return
-	}
-
-	// Commit da transação
-	if err := tx.Commit().Error; err != nil {
-		tx.Rollback()
-		http.Error(w, "Não foi possível confirmar a transação", http.StatusInternalServerError)
-		return
-	}
-
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(map[string]string{"message": "Venda atualizada com sucesso!"})
-
 }
